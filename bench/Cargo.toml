@@ -23,3 +23,9 @@ algorithms = { path = ".." }
 name = "random"
 path = "random.rs"
 harness = false
+
+[profile.bench]
+opt-level = 3
+debug = false
+debug-assertions = false
+lto = true

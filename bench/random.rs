@@ -15,9 +15,13 @@ macro_rules! bench {
             group.measurement_time(Duration::from_secs(5));
             let seed = fastrand::u64(..);
 
+            let u8_data = input::type_from_random::<u8>($strategy, COUNT, seed);
+            let u16_data = input::type_from_random::<u16>($strategy, COUNT, seed);
             let u32_data = input::type_from_random::<u32>($strategy, COUNT, seed);
 
-            write_integer_generator!(group, "u32", u32_data.iter());
+            write_u8_generator!(group, "u8", u8_data.iter());
+            write_u16_generator!(group, "u16", u16_data.iter());
+            write_u32_generator!(group, "u32", u32_data.iter());
         }
     };
 }
