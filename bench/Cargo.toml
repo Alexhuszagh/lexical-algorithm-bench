@@ -1,0 +1,25 @@
+[package]
+name = "integer-benchmark"
+version = "0.0.1"
+authors = ["Alex Huszagh <ahuszagh@gmail.com>"]
+edition = "2018"
+publish = false
+
+[dev-dependencies]
+criterion = { version = "0.5.0", features = ["html_reports"] }
+fastrand = "2.1.0"
+lazy_static = "1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+algorithms = { path = ".." }
+
+# TODO: Restore
+#[[bench]]
+#name = "json"
+#path = "json.rs"
+#harness = false
+
+[[bench]]
+name = "random"
+path = "random.rs"
+harness = false
