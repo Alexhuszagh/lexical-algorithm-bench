@@ -19,6 +19,8 @@ macro_rules! bench {
 
             write_u64_generator!(group, jeaiii64_better, data.iter());
             write_u64_generator!(group, jeaiii64_better_v2, data.iter());
+            write_u64_generator!(group, jeaiii64_better_v3, data.iter());
+            write_u64_generator!(group, jeaiii64_better_v4, data.iter());
             write_u64_generator!(group, alexandrescu64, data.iter());
             write_u64_generator!(group, naive_temp64, data.iter());
             write_u64_generator!(group, naive_exact64, data.iter());
@@ -30,7 +32,9 @@ macro_rules! bench {
 bench!(uniform, "random:uniform", input::RandomGen::Uniform);
 bench!(simple, "random:simple", input::RandomGen::Simple);
 bench!(large, "random:large", input::RandomGen::Large);
+bench!(mantissa, "random:mantissa", input::RandomGen::Mantissa);
 criterion_group!(uniform_benches, uniform);
 criterion_group!(simple_benches, simple);
 criterion_group!(large_benches, large);
-criterion_main!(uniform_benches, simple_benches, large_benches);
+criterion_group!(mantissa_benches, mantissa);
+criterion_main!(uniform_benches, simple_benches, large_benches, mantissa_benches);

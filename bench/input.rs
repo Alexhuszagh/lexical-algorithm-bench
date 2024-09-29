@@ -146,6 +146,7 @@ pub enum RandomGen {
     SimpleSigned,
     Large,
     LargeSigned,
+    Mantissa,
 
     // Floats
     OneOverRand32,
@@ -167,6 +168,7 @@ pub trait IntegerRng: NumberRng {
     fn large(rng: &mut Rng) -> String;
     fn simple_signed(rng: &mut Rng) -> String;
     fn large_signed(rng: &mut Rng) -> String;
+    fn mantissa(rng: &mut Rng) -> String;
 }
 
 /// Generate an unsigned, random range for testing.
@@ -185,6 +187,7 @@ macro_rules! unsigned_rng {
                     RandomGen::SimpleSigned => Self::simple_signed(rng),
                     RandomGen::Large => Self::large(rng),
                     RandomGen::LargeSigned => Self::large_signed(rng),
+                    RandomGen::Mantissa => Self::mantissa(rng),
                     _ => unimplemented!(),
                 }
             }
@@ -214,6 +217,17 @@ macro_rules! unsigned_rng {
             #[inline]
             fn large_signed(_: &mut Rng) -> String {
                 unimplemented!()
+            }
+
+            #[inline]
+            fn mantissa(rng: &mut Rng) -> String {
+                // 2**53 - 1
+                const MAX: u64 = 9007199254740991;
+                if ($t::MAX as u128) < (MAX as u128) {
+                    unimplemented!()
+                } else {
+                    (rng.u64(0..MAX)).to_string()
+                }
             }
         }
     )*);
@@ -273,6 +287,17 @@ macro_rules! signed_rng {
             #[inline]
             fn large_signed(rng: &mut Rng) -> String {
                 (rng.$t($lsmin..$lsmax)).to_string()
+            }
+
+            #[inline]
+            fn mantissa(rng: &mut Rng) -> String {
+                // 2**53 - 1
+                const MAX: i64 = 9007199254740991;
+                if ($t::MAX as i128) < (MAX as i128) {
+                    unimplemented!()
+                } else {
+                    (rng.i64(-MAX..MAX)).to_string()
+                }
             }
         }
     )*);
@@ -422,14 +447,14 @@ macro_rules! write_u64_generator {
     ($group:ident, $meth:ident, $iter:expr) => {{
         checked_generator!(
             $group,
-            concat!("write_u32_", stringify!($meth), "_c"),
+            concat!("write_u64_", stringify!($meth), "_c"),
             $iter,
             $meth,
             true
         );
         checked_generator!(
             $group,
-            concat!("write_u32_", stringify!($meth), "_u"),
+            concat!("write_u64_", stringify!($meth), "_u"),
             $iter,
             $meth,
             false
