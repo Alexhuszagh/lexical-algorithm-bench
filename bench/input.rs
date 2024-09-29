@@ -362,213 +362,77 @@ macro_rules! fmt_generator {
 }
 
 macro_rules! write_u8_generator {
-    ($group:ident, $type:expr, $iter:expr) => {{
+    ($group:ident, $meth:ident, $iter:expr) => {{
         checked_generator!(
             $group,
-            concat!("write_", $type, "_jeaiii_b_c"),
+            concat!("write_u8_", stringify!($meth), "_c"),
             $iter,
-            jeaiii8_better,
+            $meth,
             true
         );
         checked_generator!(
             $group,
-            concat!("write_", $type, "_jeaiii_b_u"),
+            concat!("write_u8_", stringify!($meth), "_u"),
             $iter,
-            jeaiii8_better,
-            false
-        );
-        checked_generator!(
-            $group,
-            concat!("write_", $type, "_jeaiii_as32_b_c"),
-            $iter,
-            jeaiii8as32_better,
-            true
-        );
-        checked_generator!(
-            $group,
-            concat!("write_", $type, "_jeaiii_as32_b_u"),
-            $iter,
-            jeaiii8as32_better,
-            false
-        );
-        checked_generator!(
-            $group,
-            concat!("write_", $type, "_alexandrescu_c"),
-            $iter,
-            alexandrescu8,
-            true
-        );
-        checked_generator!(
-            $group,
-            concat!("write_", $type, "_alexandrescu_u"),
-            $iter,
-            alexandrescu8,
+            $meth,
             false
         );
     }};
 }
 
 macro_rules! write_u16_generator {
-    ($group:ident, $type:expr, $iter:expr) => {{
+    ($group:ident, $meth:ident, $iter:expr) => {{
         checked_generator!(
             $group,
-            concat!("write_", $type, "_jeaiii_b_c"),
+            concat!("write_u16_", stringify!($meth), "_c"),
             $iter,
-            jeaiii16_better,
+            $meth,
             true
         );
         checked_generator!(
             $group,
-            concat!("write_", $type, "_jeaiii_b_u"),
+            concat!("write_u16_", stringify!($meth), "_u"),
             $iter,
-            jeaiii16_better,
-            false
-        );
-        checked_generator!(
-            $group,
-            concat!("write_", $type, "_jeaiii_as32_b_c"),
-            $iter,
-            jeaiii16as32_better,
-            true
-        );
-        checked_generator!(
-            $group,
-            concat!("write_", $type, "_jeaiii_as32_b_u"),
-            $iter,
-            jeaiii16as32_better,
-            false
-        );
-        checked_generator!(
-            $group,
-            concat!("write_", $type, "_alexandrescu_c"),
-            $iter,
-            alexandrescu16,
-            true
-        );
-        checked_generator!(
-            $group,
-            concat!("write_", $type, "_alexandrescu_u"),
-            $iter,
-            alexandrescu16,
+            $meth,
             false
         );
     }};
 }
 
 macro_rules! write_u32_generator {
-    ($group:ident, $type:expr, $iter:expr) => {{
+    ($group:ident, $meth:ident, $iter:expr) => {{
         checked_generator!(
             $group,
-            concat!("write_", $type, "_naive_t_c"),
+            concat!("write_u32_", stringify!($meth), "_c"),
             $iter,
-            naive32_temp,
+            $meth,
             true
         );
         checked_generator!(
             $group,
-            concat!("write_", $type, "_naive_t_u"),
+            concat!("write_u32_", stringify!($meth), "_u"),
             $iter,
-            naive32_temp,
+            $meth,
             false
         );
+    }};
+}
+
+macro_rules! write_u64_generator {
+    ($group:ident, $meth:ident, $iter:expr) => {{
         checked_generator!(
             $group,
-            concat!("write_", $type, "_naive_e_c"),
+            concat!("write_u32_", stringify!($meth), "_c"),
             $iter,
-            naive32_exact,
+            $meth,
             true
         );
         checked_generator!(
             $group,
-            concat!("write_", $type, "_naive_e_u"),
+            concat!("write_u32_", stringify!($meth), "_u"),
             $iter,
-            naive32_exact,
+            $meth,
             false
         );
-        checked_generator!(
-            $group,
-            concat!("write_", $type, "_alexandrescu_c"),
-            $iter,
-            alexandrescu32,
-            true
-        );
-        checked_generator!(
-            $group,
-            concat!("write_", $type, "_alexandrescu_u"),
-            $iter,
-            alexandrescu32,
-            false
-        );
-        checked_generator!(
-            $group,
-            concat!("write_", $type, "_jeaiii_o_c"),
-            $iter,
-            jeaiii32_original,
-            true
-        );
-        checked_generator!(
-            $group,
-            concat!("write_", $type, "_jeaiii_o_u"),
-            $iter,
-            jeaiii32_original,
-            false
-        );
-        checked_generator!(
-            $group,
-            concat!("write_", $type, "_jeaiii_b_c"),
-            $iter,
-            jeaiii32_better,
-            true
-        );
-        checked_generator!(
-            $group,
-            concat!("write_", $type, "_jeaiii_b_u"),
-            $iter,
-            jeaiii32_better,
-            false
-        );
-        checked_generator!(
-            $group,
-            concat!("write_", $type, "_jeaiii_bd_c"),
-            $iter,
-            jeaiii32_digits,
-            true
-        );
-        checked_generator!(
-            $group,
-            concat!("write_", $type, "_jeaiii_bd_u"),
-            $iter,
-            jeaiii32_digits,
-            false
-        );
-        checked_generator!(
-            $group,
-            concat!("write_", $type, "_jeaiii_10_c"),
-            $iter,
-            jeaiii32_10,
-            true
-        );
-        checked_generator!(
-            $group,
-            concat!("write_", $type, "_jeaiii_10_u"),
-            $iter,
-            jeaiii32_10,
-            false
-        );
-        checked_generator!(
-            $group,
-            concat!("write_", $type, "_jeaiii_10_start_c"),
-            $iter,
-            jeaiii32_10_start,
-            true
-        );
-        checked_generator!(
-            $group,
-            concat!("write_", $type, "_jeaiii_10_start_u"),
-            $iter,
-            jeaiii32_10_start,
-            false
-        );
-        fmt_generator!($group, concat!("write_", $type, "_fmt"), $iter);
     }};
 }

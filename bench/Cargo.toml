@@ -20,8 +20,23 @@ algorithms = { path = ".." }
 #harness = false
 
 [[bench]]
-name = "random"
-path = "random.rs"
+name = "random_u8"
+path = "random_u8.rs"
+harness = false
+
+[[bench]]
+name = "random_u16"
+path = "random_u16.rs"
+harness = false
+
+[[bench]]
+name = "random_u32"
+path = "random_u32.rs"
+harness = false
+
+[[bench]]
+name = "random_u64"
+path = "random_u64.rs"
 harness = false
 
 [profile.bench]

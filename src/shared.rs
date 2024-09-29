@@ -18,7 +18,8 @@ pub const DIGIT_TO_BASE10_SQUARED: [u8; 200] = [
 
 #[inline(always)]
 pub const fn fast_log2(x: u32) -> usize {
-    32 - 1 - (x | 1).leading_zeros() as usize
+    const BITS: usize = u32::BITS as usize;
+    BITS as usize - 1 - (x | 1).leading_zeros() as usize
 }
 
 #[inline(always)]
@@ -68,8 +69,150 @@ pub const fn fast_digit_count(x: u32) -> usize {
     count as usize
 }
 
-pub const fn digit_count(x: u32) -> usize {
-    fast_digit_count(x)
+/// Quickly calculate the number of digits in a type.
+pub trait DigitCount {
+    /// Get the number of digits in a value.
+    fn digit_count(self) -> usize;
+}
+
+impl DigitCount for u8 {
+    #[inline(always)]
+    fn digit_count(self) -> usize {
+        fast_digit_count(self as _)
+    }
+}
+
+impl DigitCount for u16 {
+    #[inline(always)]
+    fn digit_count(self) -> usize {
+        fast_digit_count(self as _)
+    }
+}
+
+impl DigitCount for u32 {
+    #[inline(always)]
+    fn digit_count(self) -> usize {
+        fast_digit_count(self)
+    }
+}
+
+#[inline(always)]
+pub const fn fast_log2_u64(x: u64) -> usize {
+    const BITS: usize = u64::BITS as usize;
+    BITS - 1 - (x | 1).leading_zeros() as usize
+}
+
+#[inline(always)]
+pub fn fast_log10_u64(x: u64) -> usize {
+    let log2 = fast_log2_u64(x);
+    (log2 * 1233) >> 12
+}
+
+#[inline(always)]
+pub fn fallback_digit_count_u64(x: u64, table: &[u64]) -> usize {
+    // This value is always within 1: calculate if we need to round-up
+    // based on a pre-computed table.
+    let log10 = fast_log10_u64(x);
+    let shift_up = table.get(log10).map_or(false, |&y| x >= y);
+
+    log10 + shift_up as usize + 1
+}
+
+impl DigitCount for u64 {
+    #[inline(always)]
+    fn digit_count(self) -> usize {
+        const TABLE: [u64; 19] = [
+            10,
+            100,
+            1000,
+            10000,
+            100000,
+            1000000,
+            10000000,
+            100000000,
+            1000000000,
+            10000000000,
+            100000000000,
+            1000000000000,
+            10000000000000,
+            100000000000000,
+            1000000000000000,
+            10000000000000000,
+            100000000000000000,
+            1000000000000000000,
+            10000000000000000000,
+        ];
+        fallback_digit_count_u64(self, &TABLE)
+    }
+}
+
+#[inline(always)]
+pub const fn fast_log2_u128(x: u128) -> usize {
+    const BITS: usize = u128::BITS as usize;
+    BITS - 1 - (x | 1).leading_zeros() as usize
+}
+
+#[inline(always)]
+pub fn fast_log10_u128(x: u128) -> usize {
+    let log2 = fast_log2_u128(x);
+    (log2 * 1233) >> 12
+}
+
+#[inline(always)]
+pub fn fallback_digit_count_u128(x: u128, table: &[u128]) -> usize {
+    // This value is always within 1: calculate if we need to round-up
+    // based on a pre-computed table.
+    let log10 = fast_log10_u128(x);
+    let shift_up = table.get(log10).map_or(false, |&y| x >= y);
+
+    log10 + shift_up as usize + 1
+}
+
+impl DigitCount for u128 {
+    #[inline(always)]
+    fn digit_count(self) -> usize {
+        const TABLE: [u128; 38] = [
+            10,
+            100,
+            1000,
+            10000,
+            100000,
+            1000000,
+            10000000,
+            100000000,
+            1000000000,
+            10000000000,
+            100000000000,
+            1000000000000,
+            10000000000000,
+            100000000000000,
+            1000000000000000,
+            10000000000000000,
+            100000000000000000,
+            1000000000000000000,
+            10000000000000000000,
+            100000000000000000000,
+            1000000000000000000000,
+            10000000000000000000000,
+            100000000000000000000000,
+            1000000000000000000000000,
+            10000000000000000000000000,
+            100000000000000000000000000,
+            1000000000000000000000000000,
+            10000000000000000000000000000,
+            100000000000000000000000000000,
+            1000000000000000000000000000000,
+            10000000000000000000000000000000,
+            100000000000000000000000000000000,
+            1000000000000000000000000000000000,
+            10000000000000000000000000000000000,
+            100000000000000000000000000000000000,
+            1000000000000000000000000000000000000,
+            10000000000000000000000000000000000000,
+            100000000000000000000000000000000000000,
+        ];
+        fallback_digit_count_u128(self, &TABLE)
+    }
 }
 
 #[inline(always)]
@@ -99,13 +242,14 @@ macro_rules! i {
 #[macro_export]
 macro_rules! write_digit {
     ($buffer:ident, $index:expr, $digit:expr, $checked:expr) => {{
+        let digit = $digit;
         $index -= 1;
         if $checked {
-            $buffer[$index] = $digit;
+            $buffer[$index] = digit;
         } else {
             unsafe {
                 let ptr = $buffer.get_unchecked_mut($index) as *mut u8;
-                core::ptr::write(ptr, $digit);
+                core::ptr::write(ptr, digit);
             }
         }
     }};
@@ -114,7 +258,8 @@ macro_rules! write_digit {
 #[macro_export]
 macro_rules! write_digits {
     ($buffer:ident, $index:expr, $r:expr, $table:ident, $checked:expr) => {{
-        write_digit!($buffer, $index, *i!($table[$r + 1]), $checked);
-        write_digit!($buffer, $index, *i!($table[$r]), $checked);
+        let r = $r;
+        write_digit!($buffer, $index, *i!($table[r + 1]), $checked);
+        write_digit!($buffer, $index, *i!($table[r]), $checked);
     }};
 }
