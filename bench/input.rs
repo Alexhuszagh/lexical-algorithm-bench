@@ -434,77 +434,89 @@ macro_rules! fmt_generator {
 }
 
 macro_rules! write_u8_generator {
-    ($group:ident, $meth:ident, $iter:expr) => {{
-        checked_generator!(
-            $group,
-            concat!("write_u8_", stringify!($meth), "_c"),
-            $iter,
-            $meth,
-            true
-        );
-        checked_generator!(
-            $group,
-            concat!("write_u8_", stringify!($meth), "_u"),
-            $iter,
-            $meth,
-            false
-        );
+    ($group:ident, $meth:ident, $iter:expr, $checked:expr) => {{
+        if $checked {
+            checked_generator!(
+                $group,
+                concat!("write_u8_", stringify!($meth), "_c"),
+                $iter,
+                $meth,
+                true
+            );
+        } else {
+            checked_generator!(
+                $group,
+                concat!("write_u8_", stringify!($meth), "_u"),
+                $iter,
+                $meth,
+                false
+            );
+        }
     }};
 }
 
 macro_rules! write_u16_generator {
-    ($group:ident, $meth:ident, $iter:expr) => {{
-        checked_generator!(
-            $group,
-            concat!("write_u16_", stringify!($meth), "_c"),
-            $iter,
-            $meth,
-            true
-        );
-        checked_generator!(
-            $group,
-            concat!("write_u16_", stringify!($meth), "_u"),
-            $iter,
-            $meth,
-            false
-        );
+    ($group:ident, $meth:ident, $iter:expr, $checked:expr) => {{
+        if $checked {
+            checked_generator!(
+                $group,
+                concat!("write_u16_", stringify!($meth), "_c"),
+                $iter,
+                $meth,
+                true
+            );
+        } else {
+            checked_generator!(
+                $group,
+                concat!("write_u16_", stringify!($meth), "_u"),
+                $iter,
+                $meth,
+                false
+            );
+        }
     }};
 }
 
 macro_rules! write_u32_generator {
-    ($group:ident, $meth:ident, $iter:expr) => {{
-        checked_generator!(
-            $group,
-            concat!("write_u32_", stringify!($meth), "_c"),
-            $iter,
-            $meth,
-            true
-        );
-        checked_generator!(
-            $group,
-            concat!("write_u32_", stringify!($meth), "_u"),
-            $iter,
-            $meth,
-            false
-        );
+    ($group:ident, $meth:ident, $iter:expr, $checked:expr) => {{
+        if $checked {
+            checked_generator!(
+                $group,
+                concat!("write_u32_", stringify!($meth), "_c"),
+                $iter,
+                $meth,
+                true
+            );
+        } else {
+            checked_generator!(
+                $group,
+                concat!("write_u32_", stringify!($meth), "_u"),
+                $iter,
+                $meth,
+                false
+            );
+        }
     }};
 }
 
 macro_rules! write_u64_generator {
-    ($group:ident, $meth:ident, $iter:expr) => {{
-        checked_generator!(
-            $group,
-            concat!("write_u64_", stringify!($meth), "_c"),
-            $iter,
-            $meth,
-            true
-        );
-        checked_generator!(
-            $group,
-            concat!("write_u64_", stringify!($meth), "_u"),
-            $iter,
-            $meth,
-            false
-        );
+    ($group:ident, $meth:ident, $iter:expr, $checked:expr) => {{
+        if $checked {
+            checked_generator!(
+                $group,
+                concat!("write_u64_", stringify!($meth), "_c"),
+                $iter,
+                $meth,
+                true
+            );
+        } else {
+            checked_generator!(
+                $group,
+                concat!("write_u64_", stringify!($meth), "_u"),
+                $iter,
+                $meth,
+                false
+            );
+        }
     }};
 }

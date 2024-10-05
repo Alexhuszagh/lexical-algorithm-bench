@@ -17,14 +17,14 @@ macro_rules! bench {
 
             let data = input::type_from_random::<u32>($strategy, COUNT, seed);
 
-            write_u32_generator!(group, jeaiii32_original, data.iter());
-            write_u32_generator!(group, jeaiii32_better, data.iter());
-            write_u32_generator!(group, jeaiii32_digits, data.iter());
-            write_u32_generator!(group, jeaiii32_10, data.iter());
-            write_u32_generator!(group, jeaiii32_10_start, data.iter());
-            write_u32_generator!(group, alexandrescu32, data.iter());
-            write_u32_generator!(group, naive_temp32, data.iter());
-            write_u32_generator!(group, naive_exact32, data.iter());
+            write_u32_generator!(group, jeaiii32_original, data.iter(), true);
+            write_u32_generator!(group, jeaiii32_better, data.iter(), true);
+            write_u32_generator!(group, jeaiii32_digits, data.iter(), true);
+            write_u32_generator!(group, jeaiii32_10, data.iter(), true);
+            write_u32_generator!(group, jeaiii32_10_start, data.iter(), true);
+            write_u32_generator!(group, alexandrescu32, data.iter(), false);
+            write_u32_generator!(group, naive_temp32, data.iter(), false);
+            write_u32_generator!(group, naive_exact32, data.iter(), false);
             fmt_generator!(group, concat!("write_u32_fmt"), data.iter());
             itoa_generator!(group, concat!("write_u32_itoa"), data.iter());
         }

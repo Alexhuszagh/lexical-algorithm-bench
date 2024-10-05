@@ -17,11 +17,11 @@ macro_rules! bench {
 
             let data = input::type_from_random::<u16>($strategy, COUNT, seed);
 
-            write_u16_generator!(group, jeaiii16_better, data.iter());
-            write_u16_generator!(group, jeaiii16as32_better, data.iter());
-            write_u16_generator!(group, alexandrescu16, data.iter());
-            write_u16_generator!(group, naive_temp16, data.iter());
-            write_u16_generator!(group, naive_exact16, data.iter());
+            write_u16_generator!(group, jeaiii16_better, data.iter()), true;
+            write_u16_generator!(group, jeaiii16as32_better, data.iter()), true;
+            write_u16_generator!(group, alexandrescu16, data.iter(), false);
+            write_u16_generator!(group, naive_temp16, data.iter(), false);
+            write_u16_generator!(group, naive_exact16, data.iter(), false);
             fmt_generator!(group, "write_u16_fmt", data.iter());
             itoa_generator!(group, "write_u16_itoa", data.iter());
         }

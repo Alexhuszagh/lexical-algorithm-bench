@@ -15,17 +15,17 @@ macro_rules! bench {
             group.measurement_time(Duration::from_secs(5));
             let seed = fastrand::u64(..);
 
-            let data = input::type_from_random::<u64>($strategy, COUNT, seed);
+            let data = input::type_from_random::<u64>($strategy, COUNT, seed), true;
 
-            write_u64_generator!(group, jeaiii64_better, data.iter());
-            write_u64_generator!(group, jeaiii64_better_v2, data.iter());
-            write_u64_generator!(group, jeaiii64_better_v3, data.iter());
-            write_u64_generator!(group, jeaiii64_better_v4, data.iter());
-            write_u64_generator!(group, jeaiii64_better_v5, data.iter());
-            write_u64_generator!(group, jeaiii64_better_v6, data.iter());
-            write_u64_generator!(group, alexandrescu64, data.iter());
-            write_u64_generator!(group, naive_temp64, data.iter());
-            write_u64_generator!(group, naive_exact64, data.iter());
+            write_u64_generator!(group, jeaiii64_better, data.iter(), true);
+            write_u64_generator!(group, jeaiii64_better_v2, data.iter(), true);
+            write_u64_generator!(group, jeaiii64_better_v3, data.iter(), true);
+            write_u64_generator!(group, jeaiii64_better_v4, data.iter(), true);
+            write_u64_generator!(group, jeaiii64_better_v5, data.iter(), true);
+            write_u64_generator!(group, jeaiii64_better_v6, data.iter(), true);
+            write_u64_generator!(group, alexandrescu64, data.iter(), false);
+            write_u64_generator!(group, naive_temp64, data.iter(), false);
+            write_u64_generator!(group, naive_exact64, data.iter(), false);
             fmt_generator!(group, concat!("write_u64_fmt"), data.iter());
             itoa_generator!(group, concat!("write_u64_itoa"), data.iter());
         }

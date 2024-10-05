@@ -17,11 +17,11 @@ macro_rules! bench {
 
             let data = input::type_from_random::<u8>($strategy, COUNT, seed);
 
-            write_u8_generator!(group, jeaiii8_better, data.iter());
-            write_u8_generator!(group, jeaiii8as32_better, data.iter());
-            write_u8_generator!(group, alexandrescu8, data.iter());
-            write_u8_generator!(group, naive_temp8, data.iter());
-            write_u8_generator!(group, naive_exact8, data.iter());
+            write_u8_generator!(group, jeaiii8_better, data.iter(), true);
+            write_u8_generator!(group, jeaiii8as32_better, data.iter(), true);
+            write_u8_generator!(group, alexandrescu8, data.iter(), false);
+            write_u8_generator!(group, naive_temp8, data.iter(), false);
+            write_u8_generator!(group, naive_exact8, data.iter(), false);
             itoa_generator!(group, "write_u8_itoa", data.iter());
             fmt_generator!(group, "write_u8_fmt", data.iter());
         }
