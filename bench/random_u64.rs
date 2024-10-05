@@ -21,10 +21,13 @@ macro_rules! bench {
             write_u64_generator!(group, jeaiii64_better_v2, data.iter());
             write_u64_generator!(group, jeaiii64_better_v3, data.iter());
             write_u64_generator!(group, jeaiii64_better_v4, data.iter());
+            write_u64_generator!(group, jeaiii64_better_v5, data.iter());
+            write_u64_generator!(group, jeaiii64_better_v6, data.iter());
             write_u64_generator!(group, alexandrescu64, data.iter());
             write_u64_generator!(group, naive_temp64, data.iter());
             write_u64_generator!(group, naive_exact64, data.iter());
             fmt_generator!(group, concat!("write_u64_fmt"), data.iter());
+            itoa_generator!(group, concat!("write_u64_itoa"), data.iter());
         }
     };
 }
@@ -32,9 +35,11 @@ macro_rules! bench {
 bench!(uniform, "random:uniform", input::RandomGen::Uniform);
 bench!(simple, "random:simple", input::RandomGen::Simple);
 bench!(large, "random:large", input::RandomGen::Large);
-bench!(mantissa, "random:mantissa", input::RandomGen::Mantissa);
+bench!(safe_int, "random:safe_int", input::RandomGen::SafeInt);
+bench!(large_safe_int, "random:large_safe_int", input::RandomGen::LargeSafeInt);
 criterion_group!(uniform_benches, uniform);
 criterion_group!(simple_benches, simple);
 criterion_group!(large_benches, large);
-criterion_group!(mantissa_benches, mantissa);
-criterion_main!(uniform_benches, simple_benches, large_benches, mantissa_benches);
+criterion_group!(safe_int_benches, safe_int);
+criterion_group!(large_safe_int_benches, large_safe_int);
+criterion_main!(uniform_benches, simple_benches, large_benches, safe_int_benches, large_safe_int_benches);

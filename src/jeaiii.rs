@@ -1,5 +1,6 @@
 #![allow(dead_code, unused)]
 
+use crate::alexandrescu::alexandrescu64;
 use crate::shared::{copy_to_dst, digit_to_char_const, DigitCount, DIGIT_TO_BASE10_SQUARED};
 
 macro_rules! write_digit_i {
@@ -27,6 +28,8 @@ macro_rules! write_digits_i {
 
 // Optimized version when printing exactly 10 digits.
 // This contains leading 0s.
+// NOTE: This does **NOT** work for values outside the range, that is, between 99_9999_9998
+// and 99_9999_9999, so it is only safe up to u32_max.
 #[inline(always)]
 pub fn jeaiii32_10<const CHECKED: bool>(n: u32, buffer: &mut [u8]) -> &mut [u8] {
     let buffer = &mut buffer[..10];
@@ -533,6 +536,7 @@ pub fn jeaiii64_better<const CHECKED: bool>(n: u64, buffer: &mut [u8]) -> &mut [
 // Basic implementation using standard division to write a 64-bit integer to
 // bytes. This uses standard division to get the upper and/or lower bytes from
 // it.
+// NOTE: This seems to have pretty bad performance and is only slightly better than v1
 #[inline(always)]
 pub fn jeaiii64_better_v2<const CHECKED: bool>(n: u64, buffer: &mut [u8]) -> &mut [u8] {
     const U32_MAX: u64 = u32::MAX as u64;
@@ -583,5 +587,152 @@ pub fn jeaiii64_better_v2<const CHECKED: bool>(n: u64, buffer: &mut [u8]) -> &mu
         buffer[index] = last;
 
         &mut buffer[..index + 10]
+    }
+}
+
+// Basic implementation using standard division to write a 64-bit integer to
+// bytes. This uses standard division to get the upper and/or lower bytes from
+// it.
+// NOTE: This has terrible performance and should not be used.
+#[inline(always)]
+pub fn jeaiii64_better_v3<const CHECKED: bool>(n: u64, buffer: &mut [u8]) -> &mut [u8] {
+    const U32_MAX: u64 = u32::MAX as u64;
+    const FACTOR: u64 = 10_0000_0000;
+    if n <= U32_MAX {
+        // Up to 10 digits
+        jeaiii32_better::<CHECKED>(n as u32, buffer)
+    } else {
+        // 10-20 digits
+        // Do an index check here so we can elide all later checks
+        let buffer = &mut buffer[..20];
+        let div = n / FACTOR;
+        let lo = (n % FACTOR) as u32;
+        let index = alexandrescu64::<false>(div, buffer).len() - 1;
+        let last = buffer[index];
+        _ = jeaiii32_10::<CHECKED>(lo, &mut buffer[index..]);
+        buffer[index] = last;
+        &mut buffer[..index + 10]
+    }
+}
+
+// This checks to see if the value can be done in 32-bits or can be done with
+// a small factor to break into an easy hi/lo words. This falls back in other
+// cases to the Alexandrescu algorithm.
+#[inline(always)]
+pub fn jeaiii64_better_v4<const CHECKED: bool>(n: u64, buffer: &mut [u8]) -> &mut [u8] {
+    const U32_MAX: u64 = u32::MAX as u64;
+    const FACTOR: u64 = 10_0000_0000;
+    if n <= U32_MAX {
+        // Up to 10 digits
+        jeaiii32_better::<CHECKED>(n as u32, buffer)
+    } else if n <= U32_MAX * FACTOR {
+        // NOTE: Our lo will be 9 digits, so we can write those digits
+        // 2nd and then re-assign the higher bits, which makes this very
+        // easy.
+
+        // 11-19 digits
+        let hi = (n / FACTOR) as u32;
+        let lo = (n % FACTOR) as u32;
+        // NOTE: We store this value so we can write 10, then just re-assign.
+        // We just always get the first 20 so the bounds checks can be elided.
+        let buffer = &mut buffer[..20];
+        let count = jeaiii32_better::<CHECKED>(hi, buffer).len();
+        let index = count.saturating_sub(1);
+        let last = buffer[index];
+        let buffer = &mut buffer[..index + 10];
+        _ = jeaiii32_10::<CHECKED>(lo, &mut buffer[index..]);
+        buffer[index] = last;
+        buffer
+    } else {
+        // just do our naive, 2-digit algorithm to avoid any performance issues
+        // due to the minimal branching this seems to have way higher performance
+        // than our overly-branched implementations
+        alexandrescu64::<false>(n, buffer)
+    }
+}
+
+// Very simple approach with just the faster, jeaiii algorithm for 32-bits and
+// the Alexandrescu for the 64-bits one.
+// NOTE: This is slow **EXCEPT** for the safe_int benchmarks which seems
+// benchmarks which seem to be faster for this (same with large safe_int)
+#[inline(always)]
+pub fn jeaiii64_better_v5<const CHECKED: bool>(n: u64, buffer: &mut [u8]) -> &mut [u8] {
+    const U32_MAX: u64 = u32::MAX as u64;
+    if n <= U32_MAX {
+        jeaiii32_better::<CHECKED>(n as u32, buffer)
+    } else {
+        alexandrescu64::<false>(n, buffer)
+    }
+}
+
+// This attempts a fully-flattened version
+// NOTE: This really isn't fast...
+#[inline(always)]
+pub fn jeaiii64_better_v6<const CHECKED: bool>(n: u64, buffer: &mut [u8]) -> &mut [u8] {
+    const U32_MAX: u64 = u32::MAX as u64;
+    let mut index = 0;
+    let mut buffer = &mut buffer[..20];
+
+    if n < 100_0000 {
+        if n < 10 {
+            let digit = digit_to_char_const(n as u32, 10);
+            write_digit_i!(buffer, index, digit, CHECKED);
+            &mut buffer[..1]
+        } else {
+            if n < 100 {
+                write_digits_i!(buffer, index, n as u32 * 2, DIGIT_TO_BASE10_SQUARED, CHECKED);
+                &mut buffer[..2]
+            } else {
+                if n < 1_0000 {
+                    // 3 or 4 digits.
+                    // 42949673 = ceil(2^32 / 10^2)
+                    print_i!(buffer, index, CHECKED, n, 42949673u64, 0, 1);
+                    &mut buffer[..index]
+                } else {
+                    // 5 or 6 digits.
+                    // 429497 = ceil(2^32 / 10^4)
+                    print_i!(buffer, index, CHECKED, n, 429497u64, 0, 2);
+                    &mut buffer[..index]
+                }
+            }
+        }
+    } else if n < U32_MAX * 2 {
+        if n < 1_0000_0000 {
+            // 7 or 8 digits.
+            // 281474978 = ceil(2^48 / 10^6) + 1
+            print_i!(buffer, index, CHECKED, n, 281474978u64, 16, 3);
+            &mut buffer[..index]
+        } else if n < 10_0000_0000 {
+            // 9 digits.
+            // 1441151882 = ceil(2^57 / 10^8) + 1
+            let mut prod = (n as u64) * 1441151882u64;
+            prod >>= 25;
+            let digit = digit_to_char_const((prod >> 32) as u32, 10);
+            write_digit_i!(buffer, index, digit, CHECKED);
+            print_2!(buffer, index, prod, CHECKED);
+            print_2!(buffer, index, prod, CHECKED);
+            print_2!(buffer, index, prod, CHECKED);
+            print_2!(buffer, index, prod, CHECKED);
+            &mut buffer[..index]
+        } else {
+            // 10 digits.
+            // 1441151881 = ceil(2^57 / 10^8)
+            let mut prod = (n as u64) * 1441151881u64;
+            prod >>= 25;
+            write_digits_i!(
+                buffer,
+                index,
+                (prod >> 32) as u32 * 2,
+                DIGIT_TO_BASE10_SQUARED,
+                CHECKED
+            );
+            print_2!(buffer, index, prod, CHECKED);
+            print_2!(buffer, index, prod, CHECKED);
+            print_2!(buffer, index, prod, CHECKED);
+            print_2!(buffer, index, prod, CHECKED);
+            &mut buffer[..index]
+        }
+    } else {
+        alexandrescu64::<false>(n, buffer)
     }
 }

@@ -319,6 +319,11 @@ u64_cases!(naive_exact64_tests, naive_exact64, true);
 u64_cases!(naive_temp64_tests, naive_temp64, true);
 u64_cases!(alexandrescu64_tests, alexandrescu64, true);
 u64_cases!(jeaiii64_better_tests, jeaiii64_better, true);
+u64_cases!(jeaiii64_better_v2_tests, jeaiii64_better_v2, true);
+u64_cases!(jeaiii64_better_v3_tests, jeaiii64_better_v3, true);
+u64_cases!(jeaiii64_better_v4_tests, jeaiii64_better_v4, true);
+u64_cases!(jeaiii64_better_v5_tests, jeaiii64_better_v5, true);
+u64_cases!(jeaiii64_better_v6_tests, jeaiii64_better_v6, true);
 
 fn roundtrip_u32<Func: Fn(u32, &mut [u8]) -> &mut [u8]>(x: u32, cb: Func) -> u32 {
     let mut buffer = [b'\x00'; 16];
@@ -572,6 +577,11 @@ u64_roundtrip_cases!(naive_temp64_roundtrip_tests, naive_temp64, true);
 u64_roundtrip_cases!(naive_exact64_roundtrip_tests, naive_exact64, true);
 u64_roundtrip_cases!(alexandrescu64_roundtrip_tests, alexandrescu64, true);
 u64_roundtrip_cases!(jeaiii64_better_roundtrip_tests, jeaiii64_better, true);
+u64_roundtrip_cases!(jeaiii64_better_v2_roundtrip_tests, jeaiii64_better_v2, true);
+u64_roundtrip_cases!(jeaiii64_better_v3_roundtrip_tests, jeaiii64_better_v3, true);
+u64_roundtrip_cases!(jeaiii64_better_v4_roundtrip_tests, jeaiii64_better_v4, true);
+u64_roundtrip_cases!(jeaiii64_better_v5_roundtrip_tests, jeaiii64_better_v5, true);
+u64_roundtrip_cases!(jeaiii64_better_v6_roundtrip_tests, jeaiii64_better_v6, true);
 
 proptest! {
     #[test]
@@ -627,5 +637,30 @@ proptest! {
     #[test]
     fn u64_better_proptest(i in u64::MIN..u64::MAX) {
         prop_assert_eq!(i, roundtrip_u64(i, algorithms::jeaiii64_better::<true>));
+    }
+
+    #[test]
+    fn u64_better_v2_proptest(i in u64::MIN..u64::MAX) {
+        prop_assert_eq!(i, roundtrip_u64(i, algorithms::jeaiii64_better_v2::<true>));
+    }
+
+    #[test]
+    fn u64_better_v3_proptest(i in u64::MIN..u64::MAX) {
+        prop_assert_eq!(i, roundtrip_u64(i, algorithms::jeaiii64_better_v3::<true>));
+    }
+
+    #[test]
+    fn u64_better_v4_proptest(i in u64::MIN..u64::MAX) {
+        prop_assert_eq!(i, roundtrip_u64(i, algorithms::jeaiii64_better_v4::<true>));
+    }
+
+    #[test]
+    fn u64_better_v5_proptest(i in u64::MIN..u64::MAX) {
+        prop_assert_eq!(i, roundtrip_u64(i, algorithms::jeaiii64_better_v5::<true>));
+    }
+
+    #[test]
+    fn u64_better_v6_proptest(i in u64::MIN..u64::MAX) {
+        prop_assert_eq!(i, roundtrip_u64(i, algorithms::jeaiii64_better_v6::<true>));
     }
 }

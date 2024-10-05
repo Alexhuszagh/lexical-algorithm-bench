@@ -22,6 +22,7 @@ macro_rules! bench {
             write_u8_generator!(group, alexandrescu8, data.iter());
             write_u8_generator!(group, naive_temp8, data.iter());
             write_u8_generator!(group, naive_exact8, data.iter());
+            itoa_generator!(group, "write_u8_itoa", data.iter());
             fmt_generator!(group, "write_u8_fmt", data.iter());
         }
     };

@@ -26,6 +26,7 @@ macro_rules! bench {
             write_u32_generator!(group, naive_temp32, data.iter());
             write_u32_generator!(group, naive_exact32, data.iter());
             fmt_generator!(group, concat!("write_u32_fmt"), data.iter());
+            itoa_generator!(group, concat!("write_u32_itoa"), data.iter());
         }
     };
 }

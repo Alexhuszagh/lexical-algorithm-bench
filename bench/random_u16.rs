@@ -23,6 +23,7 @@ macro_rules! bench {
             write_u16_generator!(group, naive_temp16, data.iter());
             write_u16_generator!(group, naive_exact16, data.iter());
             fmt_generator!(group, "write_u16_fmt", data.iter());
+            itoa_generator!(group, "write_u16_itoa", data.iter());
         }
     };
 }

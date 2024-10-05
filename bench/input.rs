@@ -146,7 +146,8 @@ pub enum RandomGen {
     SimpleSigned,
     Large,
     LargeSigned,
-    Mantissa,
+    SafeInt,
+    LargeSafeInt,
 
     // Floats
     OneOverRand32,
@@ -168,7 +169,8 @@ pub trait IntegerRng: NumberRng {
     fn large(rng: &mut Rng) -> String;
     fn simple_signed(rng: &mut Rng) -> String;
     fn large_signed(rng: &mut Rng) -> String;
-    fn mantissa(rng: &mut Rng) -> String;
+    fn safe_int(rng: &mut Rng) -> String;
+    fn large_safe_int(rng: &mut Rng) -> String;
 }
 
 /// Generate an unsigned, random range for testing.
@@ -187,7 +189,8 @@ macro_rules! unsigned_rng {
                     RandomGen::SimpleSigned => Self::simple_signed(rng),
                     RandomGen::Large => Self::large(rng),
                     RandomGen::LargeSigned => Self::large_signed(rng),
-                    RandomGen::Mantissa => Self::mantissa(rng),
+                    RandomGen::SafeInt => Self::safe_int(rng),
+                    RandomGen::LargeSafeInt => Self::large_safe_int(rng),
                     _ => unimplemented!(),
                 }
             }
@@ -220,13 +223,26 @@ macro_rules! unsigned_rng {
             }
 
             #[inline]
-            fn mantissa(rng: &mut Rng) -> String {
+            fn safe_int(rng: &mut Rng) -> String {
                 // 2**53 - 1
                 const MAX: u64 = 9007199254740991;
                 if ($t::MAX as u128) < (MAX as u128) {
                     unimplemented!()
                 } else {
-                    (rng.u64(0..MAX)).to_string()
+                    rng.u64(0..MAX).to_string()
+                }
+            }
+
+            #[inline]
+            fn large_safe_int(rng: &mut Rng) -> String {
+                // 2**32 - 1
+                const MIN: u64 = 4294967295;
+                // 2**53 - 1
+                const MAX: u64 = 9007199254740991;
+                if ($t::MAX as u128) < (MAX as u128) {
+                    unimplemented!()
+                } else {
+                    rng.u64(MIN..MAX).to_string()
                 }
             }
         }
@@ -290,13 +306,31 @@ macro_rules! signed_rng {
             }
 
             #[inline]
-            fn mantissa(rng: &mut Rng) -> String {
+            fn safe_int(rng: &mut Rng) -> String {
                 // 2**53 - 1
                 const MAX: i64 = 9007199254740991;
                 if ($t::MAX as i128) < (MAX as i128) {
                     unimplemented!()
                 } else {
-                    (rng.i64(-MAX..MAX)).to_string()
+                    rng.i64(-MAX..MAX).to_string()
+                }
+            }
+
+            #[inline]
+            fn large_safe_int(rng: &mut Rng) -> String {
+                // 2**32 - 1
+                const MIN: u64 = 4294967295;
+                // 2**53 - 1
+                const MAX: u64 = 9007199254740991;
+                if ($t::MAX as u128) < (MAX as u128) {
+                    unimplemented!()
+                } else {
+                    // TODO: Fix, should be optional positive or not...
+                    let mut value = rng.u64(MIN..MAX);
+                    if rng.bool() {
+                        value = value.wrapping_neg();
+                    }
+                    value.to_string()
                 }
             }
         }
@@ -352,6 +386,19 @@ where
 // - `group`: The name of the group containing mutiple benches.
 // - `name`: The name of the bench within the group.
 // - `iter`: An abstract iterable over the data to process.
+
+macro_rules! itoa_generator {
+    ($group:ident, $name:expr, $iter:expr) => {{
+        let mut buffer = itoa::Buffer::new();
+        $group.bench_function($name, |bench| {
+            bench.iter(|| {
+                $iter.for_each(|&x| {
+                    black_box(buffer.format(x));
+                })
+            })
+        });
+    }};
+}
 
 macro_rules! checked_generator {
     ($group:ident, $name:expr, $iter:expr, $func:ident, $checked:literal) => {{
